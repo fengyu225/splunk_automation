@@ -17,4 +17,3 @@ if __name__ == "__main__":
                 tar.add(os.path.join(backup_path,r[0]), arcname="splunk_backups/"+r[0])
         else:
             print "Not Found in Backup Repo: {0}".format(h)
-

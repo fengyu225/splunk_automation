@@ -1,6 +1,8 @@
+#!/opt/splunk/bin/python
 import sys
 import os
 import ConfigParser
+import argparse
 
 
 def change_server_conf(path):
@@ -40,10 +42,42 @@ def change_outputs_conf(path):
         configs.write(f)
 
 
+def set_followtail(path):
+    path = os.path.join(path,"inputs.conf")
+    configs = ConfigParser.SafeConfigParser()
+    configs.optionxform = str
+    configs.read(path)
+    for stanza in configs.sections():
+        if stanza.startswith("monitor://"):
+            configs.set(stanza, "followTail", "1")
+    with open(path, "w") as f:
+        configs.write(f)
+
+
+def remove_followtail(path):
+    path = os.path.join(path,"inputs.conf")
+    configs = ConfigParser.SafeConfigParser()
+    configs.optionxform = str
+    configs.read(path)
+    for stanza in configs.sections():
+        if stanza.startswith("monitor://") and "followTail" in configs.options(stanza) and configs.get(stanza, "followTail") == "1":
+            configs.remove_option(stanza,"followTail")
+    with open(path, "w") as f:
+        configs.write(f)
+
+
 if __name__ == "__main__":
-    if len(sys.argv)<=1:
-        path = "/opt/splunk/etc/system/local"
+    options = argparse.ArgumentParser()
+    options.add_argument("-p","--path", action="store",dest="path",default="/opt/splunk/etc/system/local")
+    options.add_argument("-f","--follow_tail", action="store",dest="follow_tail",default="0",help="Set followTail for each inputs.conf stanzas")
+    options.add_argument("-i","--initial", action="store",dest="initial",default="0")
+    args = options.parse_args()
+
+    if args.initial=="1":
+        change_server_conf(args.path)
+        change_outputs_conf(args.path)
+
+    if args.follow_tail=="1":
+        set_followtail(args.path)
     else:
-        path = sys.argv[1].strip()
-    change_server_conf(path)
-    change_outputs_conf(path)
+        remove_followtail(args.path)

@@ -25,14 +25,12 @@ def get_cloudsys_portal_stauts(host,field_names=cloud_sys_field_names):
             return m.group("Name")
 
 if __name__ == "__main__":
-    if len(sys.argv)<2:
-        print "pass hosts file path as first parameter"
-        sys.exit(1)
     h = ""
     for host in sys.stdin:
         host = host.strip().split(" ")[0]
         t = get_cloudsys_portal_stauts(host)
         if t is not None:
             h += t+"\n"
-    with open(sys.argv[1].strip(), "w") as f:
-        f.write(h)
+    if len(sys.argv)>1:
+        with open(sys.argv[1].strip(), "w") as f:
+            f.write(h)
